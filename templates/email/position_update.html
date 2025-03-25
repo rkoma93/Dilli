@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+            color: #111827;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6366F1;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Waitlist Position Update</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{ name }},</p>
+            <p>Your position in the waitlist "{{ waitlist_name }}" has been updated.</p>
+            <p>Current position: <strong>{{ position }}</strong></p>
+            <p>Share your referral link to move up the list faster:</p>
+            <p><code>{{ referral_link }}</code></p>
+            <a href="{{ waitlist_url }}" class="button">View Waitlist</a>
+        </div>
+    </div>
+</body>
+</html>

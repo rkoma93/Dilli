@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "components/lateral_menu.html" import lateral_menu %}
+
+{% block content %}
+<div class="flex">
+    {{ lateral_menu(waitlist, active_page='integration', active_subpage='custom') }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold font-inter">Custom Form Integration</h1>
+                <a href="{{ url_for('dashboard') }}" 
+                   class="text-[var(--color-primary)] hover:underline">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <p class="text-gray-600 mb-6">
+                This is an advanced way to build your widget with your own code. You can design the widget however you want. 
+                Follow the below steps to make your own widget. Please note this is a raw version and you have to add your own CSS 
+                to customize the look and feel of the widget.
+            </p>
+
+            <!-- API Endpoint -->
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold mb-4">API Endpoint</h2>
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <pre class="text-sm text-gray-700 font-mono overflow-x-auto"><code>POST https://{{ request.host }}/waitlist/{{ waitlist.url_slug }}/join</code></pre>
+                </div>
+            </div>
+
+            <!-- Code Example -->
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold mb-4">Example Code</h2>
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <pre class="text-sm text-gray-700 font-mono overflow-x-auto"><code>// HTML Form
+&lt;form id="waitlist-form"&gt;
+  &lt;input type="email" id="email" placeholder="Enter your email" required&gt;
+  &lt;button type="submit"&gt;Join Waitlist&lt;/button&gt;
+&lt;/form&gt;
+&lt;div id="result"&gt;&lt;/div&gt;
+
+// JavaScript
+document.getElementById('waitlist-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+
+  try {
+    const response = await fetch('https://{{ request.host }}/waitlist/{{ waitlist.url_slug }}/join', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById('result').innerHTML = `Thanks for joining! Your position is #${data.position}`;
+    } else {
+      document.getElementById('result').innerHTML = `Error: ${data.error || 'Something went wrong'}`;
+    }
+  } catch (error) {
+    document.getElementById('result').innerHTML = 'Network error, please try again.';
+  }
+});</code></pre>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div>
+                <h2 class="text-lg font-semibold mb-4">API Parameters</h2>
+                <table class="min-w-full border border-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Parameter</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Required</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r">email</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r">string</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r">Yes</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">User's email address</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r">referred_by</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r">string</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r">No</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">Referral code of the person who referred this user</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

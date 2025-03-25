@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% from "components/lateral_menu.html" import lateral_menu %}
+
+{% block content %}
+<div class="flex">
+    {{ lateral_menu(waitlist, active_page='integration', active_subpage='leaderboard') }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold font-inter">Leaderboard Integration</h1>
+                <a href="{{ url_for('dashboard') }}" 
+                   class="text-[var(--color-primary)] hover:underline">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Column: Widget Customization -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-lg font-semibold mb-6">Customize Leaderboard</h2>
+
+                <form id="leaderboardCustomizationForm" class="space-y-6">
+                    <!-- Basic Settings -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Type
+                            </label>
+                            <select name="type" class="w-full p-2 border rounded-md">
+                                <option value="position">Top Users by Position</option>
+                                <option value="referrals" selected>Top Users by Referrals</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Title
+                            </label>
+                            <input type="text" name="title" value="Top Referrers"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Subtitle
+                            </label>
+                            <input type="text" name="subtitle" value="Join them at the top!"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Users Limit
+                            </label>
+                            <input type="number" name="usersLimit" value="10" min="1" max="100"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+                    </div>
+
+                    <!-- Color Settings -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-700 border-b pb-2">Colors</h3>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Header Background
+                                </label>
+                                <input type="color" name="headerBgColor" value="#F3F4F6"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Header Text
+                                </label>
+                                <input type="color" name="headerTextColor" value="#111827"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Odd Row Background
+                                </label>
+                                <input type="color" name="oddRowBgColor" value="#FFFFFF"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Odd Row Text
+                                </label>
+                                <input type="color" name="oddRowTextColor" value="#374151"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Even Row Background
+                                </label>
+                                <input type="color" name="evenRowBgColor" value="#F9FAFB"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Even Row Text
+                                </label>
+                                <input type="color" name="evenRowTextColor" value="#374151"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Display Options -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-700 border-b pb-2">Display Options</h3>
+
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" name="showReferralCount" id="showReferralCount" 
+                                   class="h-4 w-4 text-[var(--color-primary)] rounded border-gray-300"
+                                   checked>
+                            <label for="showReferralCount" class="text-sm text-gray-700">
+                                Show referral count
+                            </label>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" name="showName" id="showName"
+                                   class="h-4 w-4 text-[var(--color-primary)] rounded border-gray-300"
+                                   checked>
+                            <label for="showName" class="text-sm text-gray-700">
+                                Show name
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Column: Preview and Integration Code -->
+            <div class="space-y-6">
+                <!-- Preview -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-lg font-semibold mb-4">Preview</h2>
+                    <div id="leaderboard-preview"></div>
+                </div>
+
+                <!-- Integration Code -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-lg font-semibold mb-4">Integration Code</h2>
+                    <div class="space-y-4">
+                        <p class="text-gray-600">
+                            Instructions - Paste the following code anywhere on your page where you want to display the leaderboard
+                        </p>
+                        <div class="bg-gray-50 p-4 rounded-md relative group">
+                            <button onclick="copyCode()" 
+                                    class="absolute top-2 right-2 px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                                Copy code
+                            </button>
+                            <pre class="text-sm text-gray-700 font-mono overflow-x-auto"><code>&lt;iframe scrolling="yes" 
+       src="https://{{ request.host }}/waitlist/{{ waitlist.url_slug }}/leaderboard" 
+       style="width: 100%; display: block; border: none; height: 100vh;"&gt;
+&lt;/iframe&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyCode() {
+        const code = `<iframe scrolling="yes" 
+       src="https://${window.location.host}/waitlist/{{ waitlist.url_slug }}/leaderboard" 
+       style="width: 100%; display: block; border: none; height: 100vh;"></iframe>`;
+
+        navigator.clipboard.writeText(code).then(() => {
+            const button = document.querySelector('[onclick="copyCode()"]');
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+                button.textContent = 'Copy code';
+            }, 2000);
+        });
+    }
+
+    const previewContainer = document.getElementById('leaderboard-preview');
+    const customizationForm = document.getElementById('leaderboardCustomizationForm');
+
+    // Sample data for preview
+    const sampleData = [
+        { position: 1, email: 'user1@example.com', name: 'John Doe', referrals: 15 },
+        { position: 2, email: 'user2@example.com', name: 'Jane Smith', referrals: 12 },
+        { position: 3, email: 'user3@example.com', name: 'Mike Johnson', referrals: 8 },
+        { position: 4, email: 'user4@example.com', name: 'Sarah Williams', referrals: 6 },
+        { position: 5, email: 'user5@example.com', name: 'David Brown', referrals: 4 }
+    ];
+
+    function updatePreview() {
+        const formData = new FormData(customizationForm);
+        const showReferrals = formData.get('showReferralCount') === 'on';
+        const showName = formData.get('showName') === 'on';
+        const type = formData.get('type');
+        const limit = parseInt(formData.get('usersLimit'));
+
+        const previewHTML = `
+            <style>
+                .leaderboard-preview {
+                    border: 1px solid #e5e7eb;
+                    border-radius: 0.5rem;
+                    overflow: hidden;
+                }
+                .leaderboard-header {
+                    background-color: ${formData.get('headerBgColor')};
+                    color: ${formData.get('headerTextColor')};
+                    padding: 1rem;
+                    text-align: center;
+                }
+                .leaderboard-title {
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    margin-bottom: 0.25rem;
+                }
+                .leaderboard-subtitle {
+                    font-size: 0.875rem;
+                    opacity: 0.8;
+                }
+                .leaderboard-row {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.75rem 1rem;
+                }
+                .leaderboard-row:nth-child(odd) {
+                    background-color: ${formData.get('oddRowBgColor')};
+                    color: ${formData.get('oddRowTextColor')};
+                }
+                .leaderboard-row:nth-child(even) {
+                    background-color: ${formData.get('evenRowBgColor')};
+                    color: ${formData.get('evenRowTextColor')};
+                }
+                .position-badge {
+                    background-color: #3b82f6;
+                    color: white;
+                    width: 2rem;
+                    height: 2rem;
+                    border-radius: 9999px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    margin-right: 1rem;
+                }
+                .user-info {
+                    flex: 1;
+                }
+                .referral-count {
+                    font-weight: 600;
+                }
+            </style>
+            <div class="leaderboard-preview">
+                <div class="leaderboard-header">
+                    <div class="leaderboard-title">${formData.get('title')}</div>
+                    <div class="leaderboard-subtitle">${formData.get('subtitle')}</div>
+                </div>
+                <div class="leaderboard-body">
+                    ${sampleData.slice(0, limit).map(user => `
+                        <div class="leaderboard-row">
+                            <div class="position-badge">${user.position}</div>
+                            <div class="user-info">
+                                ${showName ? user.name : user.email}
+                            </div>
+                            ${showReferrals ? `
+                                <div class="referral-count">
+                                    ${user.referrals} ${user.referrals === 1 ? 'invite' : 'invites'}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        previewContainer.innerHTML = previewHTML;
+    }
+
+    // Update preview on form changes
+    customizationForm.addEventListener('input', updatePreview);
+    customizationForm.addEventListener('change', updatePreview);
+
+    // Initial preview
+    updatePreview();
+</script>
+{% endblock %}

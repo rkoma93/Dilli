@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold font-inter">Your Waitlists</h1>
+        <button onclick="showCreateWaitlistModal()" 
+                class="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md">
+            Create New Waitlist
+        </button>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for waitlist in waitlists %}
+            {% include "components/waitlist_card.html" %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Create Waitlist Modal -->
+<div id="createWaitlistModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">Create New Waitlist</h2>
+        <form id="createWaitlistForm" onsubmit="handleCreateWaitlist(event)">
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Name</label>
+                <input type="text" name="name" required
+                       class="w-full p-2 border rounded-md">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Description</label>
+                <textarea name="description" rows="3"
+                          class="w-full p-2 border rounded-md"></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">URL Slug</label>
+                <input type="text" name="url_slug" required
+                       class="w-full p-2 border rounded-md">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="hideCreateWaitlistModal()"
+                        class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md">
+                    Create
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

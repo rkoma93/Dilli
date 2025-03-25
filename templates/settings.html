@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% from "components/lateral_menu.html" import lateral_menu %}
+
+{% block content %}
+<div class="flex">
+    {{ lateral_menu(waitlist, 'settings') }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold font-inter">Waitlist Settings</h1>
+                <a href="{{ url_for('dashboard') }}" 
+                   class="text-[var(--color-primary)] hover:underline">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Settings Tabs -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="border-b border-gray-200 mb-6">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button onclick="switchTab('basic')"
+                            class="tab-button active border-[var(--color-primary)] text-[var(--color-primary)] whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Basic Settings
+                    </button>
+                    <button onclick="switchTab('thank-you')"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Thank You Page
+                    </button>
+                    <button onclick="switchTab('submissions')"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Submissions
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Basic Settings Tab -->
+            <div id="basic-tab" class="tab-content">
+                <form id="basicSettingsForm" onsubmit="handleBasicSettings(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Waitlist Name
+                            </label>
+                            <input type="text" name="name" value="{{ waitlist.name }}"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Website URL
+                            </label>
+                            <input type="url" name="website_url" value="{{ waitlist.website_url }}"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+                        <button type="submit"
+                                class="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md">
+                            Save Basic Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Thank You Page Tab -->
+            <div id="thank-you-tab" class="tab-content hidden">
+                <form id="thankYouPageForm" onsubmit="handleThankYouPage(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Thank You Title
+                            </label>
+                            <input type="text" name="title" value="{{ waitlist.thank_you_page.title }}"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Thank You Message
+                            </label>
+                            <textarea name="message" rows="3"
+                                      class="w-full p-2 border rounded-md">{{ waitlist.thank_you_page.message }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Custom HTML (Optional)
+                            </label>
+                            <textarea name="custom_html" rows="5"
+                                      class="w-full p-2 border rounded-md font-mono text-sm">{{ waitlist.thank_you_page.custom_html }}</textarea>
+                        </div>
+                        <button type="submit"
+                                class="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md">
+                            Save Thank You Page
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Submissions Tab -->
+            <div id="submissions-tab" class="tab-content hidden">
+                <form id="submissionsForm" onsubmit="handleSubmissions(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Notification Email
+                            </label>
+                            <input type="email" name="notify_email" value="{{ waitlist.submission_settings.notify_email }}"
+                                   class="w-full p-2 border rounded-md"
+                                   placeholder="Email to receive notifications">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="auto_response" id="auto_response"
+                                   {% if waitlist.submission_settings.auto_response %}checked{% endif %}
+                                   class="h-4 w-4 text-[var(--color-primary)] rounded border-gray-300">
+                            <label for="auto_response" class="ml-2 block text-sm text-gray-700">
+                                Send automatic response email
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Response Email Template
+                            </label>
+                            <select name="response_email_template"
+                                    class="w-full p-2 border rounded-md">
+                                <option value="default" {% if waitlist.submission_settings.response_email_template == 'default' %}selected{% endif %}>
+                                    Default Template
+                                </option>
+                                <option value="minimal" {% if waitlist.submission_settings.response_email_template == 'minimal' %}selected{% endif %}>
+                                    Minimal Template
+                                </option>
+                                <option value="branded" {% if waitlist.submission_settings.response_email_template == 'branded' %}selected{% endif %}>
+                                    Branded Template
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit"
+                                class="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md">
+                            Save Submission Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function switchTab(tabId) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+
+        // Show selected tab content
+        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+        // Update tab button styles
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+
+        // Highlight active tab
+        const activeButton = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
+        activeButton.classList.remove('border-transparent', 'text-gray-500');
+        activeButton.classList.add('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
+    }
+
+    async function handleBasicSettings(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(`/waitlist/${waitlistId}/settings/basic`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+
+            if (!response.ok) throw new Error('Failed to update settings');
+
+            alert('Basic settings updated successfully!');
+        } catch (error) {
+            console.error('Error updating settings:', error);
+            alert('Failed to update settings. Please try again.');
+        }
+    }
+
+    async function handleThankYouPage(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(`/waitlist/${waitlistId}/settings/thank-you`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+
+            if (!response.ok) throw new Error('Failed to update thank you page');
+
+            alert('Thank you page settings updated successfully!');
+        } catch (error) {
+            console.error('Error updating thank you page:', error);
+            alert('Failed to update settings. Please try again.');
+        }
+    }
+
+    async function handleSubmissions(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        // Convert checkbox to boolean
+        formData.set('auto_response', form.auto_response.checked);
+
+        try {
+            const response = await fetch(`/waitlist/${waitlistId}/settings/submissions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+
+            if (!response.ok) throw new Error('Failed to update submission settings');
+
+            alert('Submission settings updated successfully!');
+        } catch (error) {
+            console.error('Error updating submission settings:', error);
+            alert('Failed to update settings. Please try again.');
+        }
+    }
+
+    // Initialize waitlist ID from server-side data
+    const waitlistId = {{ waitlist.id }};
+</script>
+{% endblock %}

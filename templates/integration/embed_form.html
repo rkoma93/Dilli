@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% from "components/lateral_menu.html" import lateral_menu %}
+
+{% block content %}
+<div class="flex">
+    {{ lateral_menu(waitlist, 'integration', active_subpage='embed') }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold font-inter">Embed Form Integration</h1>
+                <a href="{{ url_for('dashboard') }}" 
+                   class="text-[var(--color-primary)] hover:underline">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Column: Integration Steps -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <p class="text-gray-600 mb-6">
+                    Integrating using embed is the easiest and quickest way to show the signup form on your website. 
+                    Customize the widget and follow the below steps to integrate on your website.
+                </p>
+
+                <!-- Embed Code -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold mb-4">Step 1: Add this script to your HTML</h2>
+                    <div class="bg-gray-50 p-4 rounded-md">
+                        <pre class="text-sm text-gray-700 font-mono overflow-x-auto"><code>&lt;script src="https://waitlist.yourdomain.com/embed.js"&gt;&lt;/script&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold mb-4">Step 2: Add this div where you want the form to appear</h2>
+                    <div class="bg-gray-50 p-4 rounded-md">
+                        <pre class="text-sm text-gray-700 font-mono overflow-x-auto"><code>&lt;div id="waitlist-form" data-key="{{ waitlist.form_key }}"&gt;&lt;/div&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Widget Customization -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-lg font-semibold mb-6">Customize Widget</h2>
+
+                <form id="widgetCustomizationForm" class="space-y-8">
+                    <!-- Display Settings -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-700 border-b pb-2">Display Settings</h3>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Corner Radius (px)
+                                </label>
+                                <input type="number" name="cornerRadius" value="4" min="0" max="20"
+                                       class="w-full p-2 border rounded-md">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Border Width (px)
+                                </label>
+                                <input type="number" name="borderWidth" value="1" min="0" max="10"
+                                       class="w-full p-2 border rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Form Position
+                                </label>
+                                <select name="formPosition" class="w-full p-2 border rounded-md">
+                                    <option value="left">Left</option>
+                                    <option value="center" selected>Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Items Alignment
+                                </label>
+                                <select name="itemsAlignment" class="w-full p-2 border rounded-md">
+                                    <option value="stack" selected>Stack</option>
+                                    <option value="sideBySide">Side by Side</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Font Size (px)
+                            </label>
+                            <input type="number" name="fontSize" value="16" min="12" max="24"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-700 border-b pb-2">Input Fields</h3>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Email Placeholder
+                            </label>
+                            <input type="text" name="emailPlaceholder" value="Enter your email address"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Border Color
+                                </label>
+                                <input type="color" name="inputBorderColor" value="#E5E7EB"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Background Color
+                                </label>
+                                <input type="color" name="inputBackgroundColor" value="#FFFFFF"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Text Color
+                                </label>
+                                <input type="color" name="inputTextColor" value="#111827"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Placeholder Color
+                                </label>
+                                <input type="color" name="inputPlaceholderColor" value="#6B7280"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-700 border-b pb-2">Button</h3>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Button Text
+                            </label>
+                            <input type="text" name="buttonText" value="Join Waitlist"
+                                   class="w-full p-2 border rounded-md">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Background Color
+                                </label>
+                                <input type="color" name="buttonColor" value="#4F46E5"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">
+                                    Border Color
+                                </label>
+                                <input type="color" name="buttonBorderColor" value="#4F46E5"
+                                       class="w-full p-1 h-10 border rounded-md">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">
+                                Text Color
+                            </label>
+                            <input type="color" name="buttonTextColor" value="#FFFFFF"
+                                   class="w-full p-1 h-10 border rounded-md">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="mt-8 bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-semibold mb-4">Preview</h2>
+            <div class="border rounded-md p-6">
+                <div id="waitlist-form-preview"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize preview form
+    const previewForm = document.getElementById('waitlist-form-preview');
+    const customizationForm = document.getElementById('widgetCustomizationForm');
+
+    function updatePreview() {
+        const formData = new FormData(customizationForm);
+
+        // Create the preview HTML with inline styles for better control
+        const layout = formData.get('itemsAlignment') === 'sideBySide' ? 'flex gap-4' : 'space-y-4';
+        const position = formData.get('formPosition');
+        const cornerRadius = formData.get('cornerRadius');
+        const borderWidth = formData.get('borderWidth');
+        const fontSize = formData.get('fontSize');
+
+        const previewHTML = `
+            <style>
+                .preview-form {
+                    font-size: ${fontSize}px;
+                    ${position === 'center' ? 'margin: 0 auto;' : ''}
+                    ${position === 'right' ? 'margin-left: auto;' : ''}
+                    max-width: 600px;
+                }
+                .preview-form input {
+                    border: ${borderWidth}px solid ${formData.get('inputBorderColor')};
+                    background-color: ${formData.get('inputBackgroundColor')};
+                    color: ${formData.get('inputTextColor')};
+                    border-radius: ${cornerRadius}px;
+                    padding: 0.5em 1em;
+                    width: 100%;
+                    outline: none;
+                }
+                .preview-form input::placeholder {
+                    color: ${formData.get('inputPlaceholderColor')};
+                }
+                .preview-form button {
+                    background-color: ${formData.get('buttonColor')};
+                    border: ${borderWidth}px solid ${formData.get('buttonBorderColor')};
+                    color: ${formData.get('buttonTextColor')};
+                    border-radius: ${cornerRadius}px;
+                    padding: 0.5em 1em;
+                    cursor: pointer;
+                    ${formData.get('itemsAlignment') === 'sideBySide' ? 'width: auto;' : 'width: 100%;'}
+                    outline: none;
+                }
+                .preview-form button:hover {
+                    opacity: 0.9;
+                }
+            </style>
+            <form class="preview-form ${layout}">
+                <input type="email" 
+                       placeholder="${formData.get('emailPlaceholder')}"
+                       required />
+                <button type="submit">${formData.get('buttonText')}</button>
+            </form>
+        `;
+
+        previewForm.innerHTML = previewHTML;
+    }
+
+    // Update preview on form changes
+    customizationForm.addEventListener('input', updatePreview);
+    customizationForm.addEventListener('change', updatePreview);
+
+    // Initial preview
+    updatePreview();
+</script>
+{% endblock %}

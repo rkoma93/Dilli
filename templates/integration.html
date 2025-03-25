@@ -1,0 +1,51 @@
+
+{% extends "base.html" %}
+{% from "components/lateral_menu.html" import lateral_menu %}
+
+{% block content %}
+<div class="flex">
+    {{ lateral_menu(waitlist, active_page='integration') }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold font-inter">Integration Options</h1>
+                <a href="{{ url_for('dashboard') }}" 
+                   class="text-[var(--color-primary)] hover:underline">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Embed Form Card -->
+            <a href="{{ url_for('embed_form', waitlist_id=waitlist.id) }}" class="block">
+                <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                    <h3 class="text-lg font-semibold mb-3">Embed Form</h3>
+                    <p class="text-gray-600 mb-4">Quick and easy way to add a waitlist form to your website.</p>
+                    <div class="text-[var(--color-primary)] text-sm font-medium">Get started →</div>
+                </div>
+            </a>
+
+            <!-- Custom Form Card -->
+            <a href="{{ url_for('custom_form', waitlist_id=waitlist.id) }}" class="block">
+                <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                    <h3 class="text-lg font-semibold mb-3">Custom Form</h3>
+                    <p class="text-gray-600 mb-4">Create your own form with our API and customize it to match your needs.</p>
+                    <div class="text-[var(--color-primary)] text-sm font-medium">Get started →</div>
+                </div>
+            </a>
+
+            <!-- Leaderboard Card -->
+            <a href="{{ url_for('leaderboard', waitlist_id=waitlist.id) }}" class="block">
+                <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                    <h3 class="text-lg font-semibold mb-3">Leaderboard</h3>
+                    <p class="text-gray-600 mb-4">Display a referral leaderboard to encourage more signups.</p>
+                    <div class="text-[var(--color-primary)] text-sm font-medium">Get started →</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
