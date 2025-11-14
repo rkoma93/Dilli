@@ -1,0 +1,33 @@
+name: Generate land-dots.svg
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:      # allows manual run from GitHub UI
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install node-fetch
+
+      - name: Run generator
+        run: node scripts/generate-dots.js
+
+      - name: Commit & push SVG (if changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add land-dots.svg
+          git diff --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update land-dots.svg [skip ci]"
+          git push
