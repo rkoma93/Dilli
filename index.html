@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dotted Land Globe</title>
+  <style>
+    body { margin:0; overflow:hidden; background:#000; }
+    #globe { position:fixed; inset:0; width:100%; height:100%; }
+    #loading { 
+      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+      color:#6ca0ff; font:18px Arial; z-index:10; 
+    }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading globe...</div>
+  <div id="globe"></div>
+
+  <script src="https://unpkg.com/globe.gl"></script>
+  <script>
+    const loading = document.getElementById('loading');
+    const wait = setInterval(() => {
+      if (typeof Globe === 'undefined') return;
+      clearInterval(wait);
+
+      const globe = Globe()(document.getElementById('globe'))
+        .globeImageUrl(null)
+        .backgroundImageUrl('land-dots.svg')  // <-- Uses the generated SVG
+        .backgroundColor('#000')
+        .showAtmosphere(true)
+        .atmosphereColor('#6ca0ff')
+        .atmosphereAltitude(0.12)
+        .pointOfView({ lat:0, lng:0, altitude:2.5 })
+        .width(window.innerWidth)
+        .height(window.innerHeight);
+
+      setTimeout(() => {
+        loading.classList.add('hidden');
+        const c = globe.controls();
+        c.autoRotate = true;
+        c.autoRotateSpeed = 0.3;
+        c.enableZoom = c.enablePan = c.enableRotate = false;
+      }, 600);
+
+      window.addEventListener('resize', () => {
+        globe.width(window.innerWidth).height(window.innerHeight);
+      });
+    }, 50);
+  </script>
+</body>
+</html>
