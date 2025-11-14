@@ -8,39 +8,31 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Extra time for rasterization
+    timeout-minutes: 12
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Install node-fetch
         run: npm install node-fetch@2
 
-      - name: Run generator
+      - name: Generate SVG
         run: node scripts/generate-dots.js
 
-      - name: Optimize SVG (compress size)
-        if: success()
-        run: |
-          npm install -g svgo-cli
-          svgo land-dots.svg --output land-dots.svg --precision 3
-          echo "Compressed SVG size: $(wc -c < land-dots.svg) bytes"
-
-      - name: Commit & push if changed
-        if: success()
+      - name: Commit & push (only if changed)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add land-dots.svg
-          if git diff --quiet; then
-            echo "No changes to land-dots.svg"
+          if git diff --quiet HEAD; then
+            echo "No changes"
           else
-            git commit -m "chore: update compressed land-dots.svg [skip ci]"
+            git commit -m "chore: regenerate land-dots.svg [skip ci]"
             git push
           fi
