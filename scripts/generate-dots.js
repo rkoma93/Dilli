@@ -4,16 +4,16 @@
 // ---------------------------------------------------------------
 const fs = require('fs');
 const fetch = require('node-fetch');
-const { optimize } = require('svgo');   // <-- in-node compression
+const { optimize } = require('svgo');
 
 // ---------------------------------------------------------------
-// 2. URLs (the 404 one is fixed)
+// 2. URLs – the file is now in /topojson/ folder
 // ---------------------------------------------------------------
-const PRIMARY_URL   = 'https://raw.githubusercontent.com/topojson/world-atlas/master/countries-110m.json';
-const FALLBACK_URL  = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+const PRIMARY_URL  = 'https://raw.githubusercontent.com/topojson/world-atlas/master/topojson/countries-110m.json';
+const FALLBACK_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
 // ---------------------------------------------------------------
-// 3. Fetch with retries & logging
+// 3. Fetch with timeout & fallback
 // ---------------------------------------------------------------
 async function fetchTopojson() {
   const urls = [PRIMARY_URL, FALLBACK_URL];
@@ -21,8 +21,12 @@ async function fetchTopojson() {
     const url = urls[i];
     console.log(`\n--- Attempt ${i + 1}: ${url} ---`);
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-      console.log(`Status: ${res.status} ${res.statusText}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+
+      console.log(`Status: ${res.status}`);
       if (!res.ok) { console.log('Not OK – next'); continue; }
 
       const ct = res.headers.get('content-type') || '';
@@ -34,7 +38,7 @@ async function fetchTopojson() {
         return data;
       }
     } catch (e) {
-      console.log('Fetch error:', e.message);
+      console.log('Error:', e.name === 'AbortError' ? 'timeout' : e.message);
     }
   }
   throw new Error('All map sources failed');
@@ -94,17 +98,16 @@ function pointInPoly(pt, poly) {
 }
 
 // ---------------------------------------------------------------
-// 6. SVG compression config
+// 6. Chunked SVGO compression (prevents OOM)
 // ---------------------------------------------------------------
-const SVGO_CONFIG = {
-  plugins: [
-    { name: 'removeViewBox', active: false },
-    { name: 'removeDimensions', active: false },
-    { name: 'convertColors', active: true },
-    { name: 'cleanupNumericValues', active: true, params: { floatPrecision: 2 } },
-    { name: 'convertPathData', active: true, params: { floatPrecision: 2 } },
-  ]
-};
+function compressChunk(svgChunk) {
+  return optimize(svgChunk, {
+    multipass: true,
+    plugins: [
+      { name: 'preset-default', params: { overrides: { cleanupNumericValues: { floatPrecision: 2 } } } }
+    ]
+  }).data;
+}
 
 // ---------------------------------------------------------------
 // 7. Main
@@ -117,46 +120,47 @@ const SVGO_CONFIG = {
     const polygons = topoToPolygons(topo);
     console.log(` → ${polygons.length} polygons`);
 
-    // ---- rasterize (coarser grid for speed) ----
-    const step = 0.4;      // 0.4° → ~500 k dots (still crisp)
-    const sub = 2;
-    const jitter = 0.06;
+    // ---- FAST rasterize (0.6° grid → ~200 k dots) ----
+    const step = 0.6;      // 0.6° = ~200 k dots, still crisp
+    const sub = 1;         // 1×1 sub-sample (good enough)
+    const jitter = 0.08;
     const dots = [];
 
     console.log('Rasterizing land...');
     const t0 = Date.now();
     for (let lat = -90; lat <= 90; lat += step) {
       for (let lng = -180; lng <= 180; lng += step) {
-        for (let sy = 0; sy < sub; sy++) {
-          for (let sx = 0; sx < sub; sx++) {
-            const l = lat + (sy + 0.5) * step / sub + (Math.random() - 0.5) * jitter;
-            const g = lng + (sx + 0.5) * step / sub + (Math.random() - 0.5) * jitter;
-            if (l < -90 || l > 90 || g < -180 || g > 180) continue;
-            if (polygons.some(p => pointInPoly([g, l], p))) dots.push({ lat: l, lng: g });
-          }
-        }
+        const l = lat + (Math.random() - 0.5) * jitter;
+        const g = lng + (Math.random() - 0.5) * jitter;
+        if (l < -90 || l > 90 || g < -180 || g > 180) continue;
+        if (polygons.some(p => pointInPoly([g, l], p))) dots.push({ lat: l, lng: g });
       }
     }
     console.log(`Done: ${dots.length} dots in ${(Date.now() - t0) / 1000}s`);
 
-    // ---- build SVG ----
+    // ---- Build SVG in chunks ----
     const w = 1000, h = 500;
-    const circles = dots.map(d => {
-      const x = ((d.lng + 180) / 360 * w).toFixed(2);
-      const y = ((90 - d.lat) / 180 * h).toFixed(2);
-      return `<circle cx="${x}" cy="${y}" r="0.5" fill="#6ca0ff"/>`;
-    }).join('');
+    const chunkSize = 50000;   // 50 k circles per chunk
+    const chunks = [];
+    for (let i = 0; i < dots.length; i += chunkSize) {
+      const slice = dots.slice(i, i + chunkSize);
+      const circles = slice.map(d => {
+        const x = ((d.lng + 180) / 360 * w).toFixed(2);
+        const y = ((90 - d.lat) / 180 * h).toFixed(2);
+        return `<circle cx="${x}" cy="${y}" r="0.6" fill="#6ca0ff"/>`;
+      }).join('');
+      chunks.push(circles);
+    }
 
-    const rawSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+    console.log(`Compressing ${chunks.length} SVG chunks...`);
+    const compressedChunks = chunks.map(chunk => compressChunk(`<g>${chunk}</g>`));
+    const finalSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
   <rect width="100%" height="100%" fill="#000"/>
-  ${circles}
+  ${compressedChunks.join('')}
 </svg>`;
 
-    // ---- compress inline ----
-    console.log('Compressing SVG...');
-    const compressed = optimize(rawSvg, SVGO_CONFIG).data;
-    const sizeMB = (compressed.length / 1024 / 1024).toFixed(2);
-    fs.writeFileSync('land-dots.svg', compressed);
+    fs.writeFileSync('land-dots.svg', finalSvg);
+    const sizeMB = (finalSvg.length / 1024 / 1024).toFixed(2);
     console.log(`land-dots.svg saved – ${sizeMB} MB`);
   } catch (e) {
     console.error('Failed:', e);
