@@ -33,6 +33,6 @@ jobs:
           if git diff --quiet; then
             echo "No changes"
           else
-            git commit -m "chore: update land-dots.svg [skip ci]"
+            git commit -m "chore: update land-dots.svg"
             git push
           fi
